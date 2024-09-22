@@ -1,0 +1,16 @@
+{
+  "name": "backend",
+  "scripts": {
+    "dev": "tsx watch src/index.ts"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.0",
+    "@prisma/client": "^5.19.1",
+    "hono": "^4.6.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.17",
+    "prisma": "^5.19.1",
+    "tsx": "^4.7.1"
+  }
+}
