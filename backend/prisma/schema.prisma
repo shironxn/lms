@@ -33,6 +33,8 @@ model Quiz {
   id          String     @id @default(uuid())
   title       String     @unique
   description String?
+  start_at    DateTime
+  end_at      DateTime
   created_at  DateTime   @default(now())
   updated_at  DateTime   @updatedAt
   Question    Question[]
@@ -63,13 +65,14 @@ model AnswerOption {
 }
 
 model Token {
-  id          String        @id @default(uuid())
-  quiz        Quiz          @relation(fields: [quiz_id], references: [id])
-  quiz_id     String
-  code        String        @unique
-  expires_at  DateTime
-  created_at  DateTime      @default(now())
-  participant Participant[]
+  id               String        @id @default(uuid())
+  quiz             Quiz          @relation(fields: [quiz_id], references: [id])
+  quiz_id          String
+  code             String        @unique
+  max_participants Int
+  expires_at       DateTime
+  created_at       DateTime      @default(now())
+  participant      Participant[]
 }
 
 model Participant {

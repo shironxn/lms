@@ -1,12 +1,12 @@
 import { Prisma, PrismaClient, Token } from "@prisma/client";
 
-export interface IToken {
+export interface ITokenRepository {
   findAll(): Promise<Token[] | null>;
   create(data: Prisma.TokenCreateInput): Promise<void>;
   delete(id: string): Promise<void>;
 }
 
-export class TokenRepository implements IToken {
+export class TokenRepository implements ITokenRepository {
   private readonly prisma: PrismaClient;
 
   constructor(prisma: PrismaClient) {

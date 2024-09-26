@@ -1,13 +1,13 @@
 import { AnswerOption, Prisma, PrismaClient } from "@prisma/client";
 
-export interface IAnswerOption {
+export interface IAnswerOptionRepository {
   findAll(): Promise<AnswerOption[] | null>;
   findById(id: string): Promise<AnswerOption | null>;
   create(data: Prisma.AnswerOptionCreateInput): Promise<void>;
   delete(id: string): Promise<void>;
 }
 
-export class AnswerOptionRepository implements IAnswerOption {
+export class AnswerOptionRepository implements IAnswerOptionRepository {
   private readonly prisma: PrismaClient;
 
   constructor(prisma: PrismaClient) {

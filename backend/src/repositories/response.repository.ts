@@ -1,13 +1,13 @@
 import { Response, Prisma, PrismaClient } from "@prisma/client";
 
-export interface IResponse {
+export interface IResponseRepository {
   findAll(): Promise<Response[] | null>;
   findById(id: string): Promise<Response | null>;
   create(data: Prisma.ResponseCreateInput): Promise<void>;
   delete(id: string): Promise<void>;
 }
 
-export class ResponseRepository implements IResponse {
+export class ResponseRepository implements IResponseRepository {
   private readonly prisma: PrismaClient;
 
   constructor(prisma: PrismaClient) {

@@ -6,6 +6,8 @@
   "dependencies": {
     "@hono/node-server": "^1.13.0",
     "@prisma/client": "^5.19.1",
+    "@types/bcrypt": "^5.0.2",
+    "bcrypt": "^5.1.1",
     "hono": "^4.6.2"
   },
   "devDependencies": {

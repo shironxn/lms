@@ -1,6 +1,7 @@
 import { Prisma, PrismaClient, User } from "@prisma/client";
 
 export interface IUserRepository {
+  findAll(): Promise<User[] | null>;
   findById(id: string): Promise<User | null>;
   findByEmail(email: string): Promise<User | null>;
   create(data: Prisma.UserCreateInput): Promise<void>;
@@ -13,6 +14,14 @@ export class UserRepository implements IUserRepository {
 
   constructor(prisma: PrismaClient) {
     this.prisma = prisma;
+  }
+
+  async findAll(): Promise<User[] | null> {
+    try {
+      return await this.prisma.user.findMany();
+    } catch (error: any) {
+      throw new Error(error.message);
+    }
   }
 
   async findById(id: string): Promise<User | null> {

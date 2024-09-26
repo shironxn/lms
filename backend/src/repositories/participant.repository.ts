@@ -1,13 +1,13 @@
 import { Participant, Prisma, PrismaClient } from "@prisma/client";
 
-export interface IParticipant {
+export interface IParticipantRepository {
   findAll(): Promise<Participant[] | null>;
   findById(id: string): Promise<Participant | null>;
   create(data: Prisma.ParticipantCreateInput): Promise<void>;
   delete(id: string): Promise<void>;
 }
 
-export class ParticipantRepository implements IParticipant {
+export class ParticipantRepository implements IParticipantRepository {
   private readonly prisma: PrismaClient;
 
   constructor(prisma: PrismaClient) {
