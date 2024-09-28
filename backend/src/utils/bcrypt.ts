@@ -7,7 +7,7 @@ export interface IBcrypt {
 
 export class Bcrypt implements IBcrypt {
   async hashPassword(password: string): Promise<string | null> {
-    return bcrypt.hash(password, "tes11");
+    return bcrypt.hash(password, 10);
   }
 
   async comparePassword(

@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { IUserRepository } from "../repositories/user.repository";
-import { IBcrypt } from "../utils/bcyrpt";
+import { IBcrypt } from "../utils/bcrypt";
+import { HTTPException } from "hono/http-exception";
 
 type User = {
   id: string;
@@ -20,10 +21,10 @@ type Register = {
 };
 
 export interface IUserService {
-  login(data: Login): Promise<User | null>;
+  login(data: Login): Promise<User>;
   register(data: Register): Promise<void>;
-  findAll(): Promise<User[] | null>;
-  findById(id: string): Promise<User | null>;
+  findAll(): Promise<User[]>;
+  findById(id: string): Promise<User>;
   update(id: string, data: Prisma.UserUpdateInput): Promise<void>;
   delete(id: string): Promise<void>;
 }
@@ -37,99 +38,62 @@ export class UserService implements IUserService {
     this.bcyrpt = bcyrpt;
   }
 
-  async login(data: Login): Promise<User | null> {
-    try {
-      const user = await this.repository.findByEmail(data.email);
-      if (!user) {
-        throw new Error("User not found");
-      }
+  async login(data: Login): Promise<User> {
+    const user = await this.repository.findByEmail(data.email);
 
-      const isPasswordValid = await this.bcyrpt.comparePassword(
-        data.password,
-        user.password,
-      );
-      if (!isPasswordValid) {
-        throw new Error("Invalid password");
-      }
-
-      return {
-        id: user.id,
-        email: user.email,
-        created_at: user.created_at,
-        updated_at: user.updated_at,
-      };
-    } catch (error: any) {
-      throw new Error(error.message);
+    if (!(await this.bcyrpt.comparePassword(data.password, user.password))) {
+      throw new HTTPException(401, { message: "Invalid credentials" });
     }
+
+    return {
+      id: user.id,
+      email: user.email,
+      created_at: user.created_at,
+      updated_at: user.updated_at,
+    };
   }
 
   async register(data: Register): Promise<void> {
-    try {
-      const hashedPassword = await this.bcyrpt.hashPassword(data.password);
-      if (!hashedPassword) {
-        return;
-      }
-
-      await this.repository.create({
-        email: data.email,
-        password: hashedPassword,
-      });
-    } catch (error: any) {
-      throw new Error(error.message);
+    const hashedPassword = await this.bcyrpt.hashPassword(data.password);
+    if (!hashedPassword) {
+      return;
     }
+
+    await this.repository.create({
+      email: data.email,
+      password: hashedPassword,
+    });
   }
 
-  async findAll(): Promise<User[] | null> {
-    try {
-      const data = await this.repository.findAll();
-      if (!data) {
-        throw new Error("user not found");
-      }
+  async findAll(): Promise<User[]> {
+    const data = await this.repository.findAll();
 
-      const users: User[] = data.map((value) => ({
-        id: value.id,
-        email: value.email,
-        created_at: value.created_at,
-        updated_at: value.updated_at,
-      }));
+    const users: User[] = data.map((value) => ({
+      id: value.id,
+      email: value.email,
+      created_at: value.created_at,
+      updated_at: value.updated_at,
+    }));
 
-      return users;
-    } catch (error: any) {
-      throw new Error(error.message);
-    }
+    return users;
   }
 
-  async findById(id: string): Promise<User | null> {
-    try {
-      const data = await this.repository.findById(id);
-      if (!data) {
-        throw new Error("user not found");
-      }
+  async findById(id: string): Promise<User> {
+    const data = await this.repository.findById(id);
 
-      return {
-        id: data.id,
-        email: data.email,
-        created_at: data.created_at,
-        updated_at: data.updated_at,
-      };
-    } catch (error: any) {
-      throw new Error(error.message);
-    }
+    return {
+      id: data.id,
+      email: data.email,
+      created_at: data.created_at,
+      updated_at: data.updated_at,
+    };
   }
 
   async update(id: string, data: Prisma.UserUpdateInput): Promise<void> {
-    try {
-      await this.repository.update(id, data);
-    } catch (error: any) {
-      throw new Error(error.message);
-    }
+    await this.repository.update(id, data);
   }
 
   async delete(id: string): Promise<void> {
-    try {
-      await this.repository.delete(id);
-    } catch (error: any) {
-      throw new Error(error.message);
-    }
+    await this.repository.delete(id);
   }
 }
