@@ -2,10 +2,11 @@ import { Prisma } from "@prisma/client";
 import { IUserRepository } from "../repositories/user.repository";
 import { IBcrypt } from "../utils/bcrypt";
 import { HTTPException } from "hono/http-exception";
+import { sign } from "hono/jwt";
 
 type User = {
   id: string;
-  email: string;
+  token?: string;
   created_at: Date;
   updated_at: Date;
 };
@@ -45,9 +46,17 @@ export class UserService implements IUserService {
       throw new HTTPException(401, { message: "Invalid credentials" });
     }
 
+    const payload = {
+      id: user.id,
+      role: user.email === process.env.ADMIN_EMAIL ? "admin" : "user",
+      exp: Math.floor(Date.now() / 1000) + 60 * 5,
+    };
+    const secret = process.env.JWT_SECRET!;
+    const token = await sign(payload, secret);
+
     return {
       id: user.id,
-      email: user.email,
+      token: token,
       created_at: user.created_at,
       updated_at: user.updated_at,
     };
@@ -83,7 +92,6 @@ export class UserService implements IUserService {
 
     return {
       id: data.id,
-      email: data.email,
       created_at: data.created_at,
       updated_at: data.updated_at,
     };

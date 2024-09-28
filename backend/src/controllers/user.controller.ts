@@ -1,5 +1,6 @@
 import { Context } from "hono";
 import { IUserService } from "../services/user.service";
+import { setCookie } from "hono/cookie";
 
 export interface IUserController {
   login(c: Context): Promise<Response>;
@@ -20,6 +21,7 @@ export class UserController implements IUserController {
   async login(c: Context): Promise<Response> {
     const body = await c.req.json();
     const data = await this.service.login(body);
+    setCookie(c, "token", data.token!);
     return c.json({ message: "Login successful", data });
   }
 

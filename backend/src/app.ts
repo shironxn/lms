@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { Context, Hono } from "hono";
+import { Context, Hono, MiddlewareHandler } from "hono";
 import { Bcrypt } from "./utils/bcrypt";
 import {
   IUserRepository,
@@ -9,6 +9,8 @@ import { IUserService, UserService } from "./services/user.service";
 import { IUserController, UserController } from "./controllers/user.controller";
 import { UserRoutes } from "./routes/user.route";
 import { serve } from "@hono/node-server";
+import { logger } from "hono/logger";
+import { AuthMiddleware } from "./middleware/auth.middleware";
 
 export class App {
   private readonly port: number;
@@ -32,6 +34,7 @@ export class App {
   }
 
   private initApp() {
+    this.app.use(logger());
     this.app.onError((error: any, c: Context): Response => {
       return c.json({ error: error.message }, error.status);
     });
@@ -39,10 +42,13 @@ export class App {
 
   private initRoutes() {
     const bcrypt = new Bcrypt();
+
+    const authMiddleware = new AuthMiddleware(process.env.JWT_SECRET!);
+
     const userRepository: IUserRepository = new UserRepository(this.prisma);
     const userService: IUserService = new UserService(userRepository, bcrypt);
     const userController: IUserController = new UserController(userService);
-    const userRoutes = new UserRoutes(this.app, userController);
+    const userRoutes = new UserRoutes(this.app, userController, authMiddleware);
 
     userRoutes.run();
   }
